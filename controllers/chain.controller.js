@@ -1,4 +1,4 @@
-import chainService from '../services/chain.service.js';
+import chain from '../models/Chain.js';
 
 // GET all chains
 export const getAllChains = async (req, res) => {
