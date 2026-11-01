@@ -2,12 +2,11 @@ import { connect } from 'mongoose';
 
 export const connectDB = async () => {
   try {
-    // השם כאן מתואם כעת לשם בקובץ ה-.env
-    const mongoUri = process.env.MONGO_URI ?? 'mongodb://localhost:27017/ShoppingApp';
+    const mongoUri = process.env.MONGO_URI ?? 'mongodb://localhost:27017/ShoppingCompare';
     
     await connect(mongoUri);
     console.log('MongoDB connected successfully');
-  } catch (error) {
+  }  catch (error) {
     console.error('Error connecting to MongoDB:', error.message);
     process.exit(1); // עוצר את השרת כדי שלא ירוץ באוויר ללא מסד נתונים
   }
