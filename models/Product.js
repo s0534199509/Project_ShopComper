@@ -1,18 +1,17 @@
 import { Schema, model } from 'mongoose';
 
-
-// הגדרת המבנה של מוצר (Schema)
 const productSchema = new Schema(
   {
+    barcode: {
+      type: String,
+      required: [true, 'נא להזין ברקוד'],
+      unique: true, // מבטיח שלא נכניס בטעות פעמיים את אותו מוצר
+      trim: true,
+    },
     name: {
       type: String,
       required: [true, 'נא להזין שם מוצר'],
       trim: true,
-    },
-    price: {
-      type: Number,
-      required: [true, 'נא להזין מחיר מוצר'],
-      min: [0, 'מחיר אינו יכול להיות שלילי'],
     },
     description: {
       type: String,
@@ -26,19 +25,11 @@ const productSchema = new Schema(
       type: String,
       default: '',
     },
-    inStock: {
-      type: Boolean,
-      default: true,
-    },
   },
   {
     timestamps: true, // מוסיף אוטומטית שדות createdAt ו-updatedAt
   }
 );
 
-
-// יצירת וייצוא ה-Model
 const Product = model('Product', productSchema);
-
-
 export default Product;
