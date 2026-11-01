@@ -1,6 +1,7 @@
 import express from 'express'
 import { connectDB } from './config/db.js';
 import productRouter from './routes/product.router.js';
+import chainRouter from './routes/chain.router.js';
 
 // 1. יצירת שרת אקספרס
 const app = express();
@@ -20,6 +21,7 @@ app.get('/', (req, res) => {
 });
 
 app.use('/products', productRouter);
+app.use('/chains', chainRouter);
 
 // 3. הרצת השרת
 // ?? - null/undefined כמו || עבור
