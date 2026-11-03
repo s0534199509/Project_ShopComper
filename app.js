@@ -2,6 +2,7 @@ import express from 'express'
 import { connectDB } from './config/db.js';
 import productRouter from './routes/product.router.js';
 import chainRouter from './routes/chain.router.js';
+import priceRouter from './routes/price.router.js';
 
 // 1. יצירת שרת אקספרס
 const app = express();
@@ -12,6 +13,9 @@ connectDB();
 
 // מקבל באדי מסוג אוביקט גייסון - { ... }
 app.use(express.json());
+
+app.use('/prices', priceRouter);
+
 // מקבל באדי מסוג טופס, אם רוצים להעלות תמונה/קובץ - FormData
 app.use(express.urlencoded({ extended: true }));
 
