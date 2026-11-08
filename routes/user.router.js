@@ -1,12 +1,11 @@
-import express from 'express';
-import { registerUser, loginUser } from '../controllers/user.controller.js';
+import { Router } from 'express';
+import { loginUser, registerUser } from '../controllers/user.controller.js';
+import { validateBody } from '../middlewares/custom.middleware.js';
+import { loginUserSchema, registerUserSchema } from '../validations/user.validation.js';
 
-const router = express.Router();
+const router = Router();
 
-// POST /api/users/register - הרשמה
-router.post('/register', registerUser);
-
-// POST /api/users/login - התחברות
-router.post('/login', loginUser);
+router.post('/register', validateBody(registerUserSchema), registerUser);
+router.post('/login', validateBody(loginUserSchema), loginUser);
 
 export default router;

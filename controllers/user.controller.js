@@ -1,4 +1,4 @@
-import User from '../models/user.js';
+import User from '../models/User.js';
 import Cart from '../models/Cart.js';
 
 // הרשמת משתמש חדש ויצירת עגלה ראשונית
@@ -9,11 +9,13 @@ export const registerUser = async (req, res) => {
     // בדיקה אם המשתמש כבר קיים
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({ message: 'משתמש עם אימייל זה כבר קיים במערכת' });
+      return res.status(409).json({ message: 'משתמש עם אימייל זה כבר קיים במערכת' });
     }
 
     // יצירת המשתמש
-    const user = await User.create({ name, email, password });
+    const user = new User({ name, email });
+    await user.setPassword(password);
+    await user.save();
 
     // יצירת עגלה ריקה המשויכת למשתמש החדש
     await Cart.create({ user: user._id, items: [] });
@@ -23,7 +25,12 @@ export const registerUser = async (req, res) => {
       user: { id: user._id, name: user.name, email: user.email },
     });
   } catch (error) {
-    res.status(500).json({ message: 'שגיאה בהרשמת המשתמש', error: error.message });
+    if (error.code === 11000 && error.keyPattern?.email) {
+      return res.status(409).json({ message: 'משתמש עם אימייל זה כבר קיים במערכת' });
+    }
+
+    console.error('Error registering user:', error);
+    res.status(500).json({ message: 'שגיאה בהרשמת המשתמש' });
   }
 };
 
@@ -32,9 +39,9 @@ export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const user = await User.findOne({ email });
-    if (!user || user.password !== password) {
-      return res.status(400).json({ message: 'אימייל או סיסמה שגויים' });
+    const user = await User.findOne({ email }).select('+passwordHash');
+    if (!user || !(await user.verifyPassword(password))) {
+      return res.status(401).json({ message: 'אימייל או סיסמה שגויים' });
     }
 
     res.status(200).json({
@@ -42,6 +49,7 @@ export const loginUser = async (req, res) => {
       user: { id: user._id, name: user.name, email: user.email },
     });
   } catch (error) {
-    res.status(500).json({ message: 'שגיאה בהתחברות', error: error.message });
+    console.error('Error logging in user:', error);
+    res.status(500).json({ message: 'שגיאה בהתחברות' });
   }
 };
