@@ -3,7 +3,7 @@ import {Schema, model} from 'mongoose';
 const chainSchema = new Schema({
  name: {
       type: String,
-      required: [true, 'נא להזין שם מוצר'],
+      required: [true,'נא להזין שם רשת'],
       trim: true,
     },
     logoUrl: {

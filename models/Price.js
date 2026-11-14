@@ -22,5 +22,8 @@ const priceSchema = new Schema({
   }
 }, { timestamps: true });
 
+// מונע הכנסה כפולה של מחיר עבור אותו מוצר באותה רשת שיווק
+priceSchema.index({ product: 1, chain: 1 }, { unique: true });
+
 const Price = model('Price', priceSchema);
 export default Price;
