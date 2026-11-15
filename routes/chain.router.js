@@ -8,7 +8,7 @@ import {
   deleteChain,
 } from '../controllers/chain.controller.js';
 import { validateBody } from '../middlewares/custom.middleware.js';
-import { chainPostSchema, chainPatchSchema } from '../validations/Chain.validation.js';
+import { chainPostSchema, chainPatchSchema } from '../validations/chain.validation.js';
 
 const router = Router();
 

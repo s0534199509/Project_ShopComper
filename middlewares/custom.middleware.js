@@ -1,3 +1,5 @@
+
+import { AppError } from '../utils/appErrors.js'; // ייבוא מחלקת AppError
 //הרשאות לקליינט מסויים
 
 //בדיקת הרשאות מנהך/משתמש
@@ -14,13 +16,15 @@ export const validateBody = (schema) => (req, res, next) => {
     const { error, value } = schema.validate(req.body, { abortEarly: false });
 
     if (error) {
-        return res.status(400).json({
-            message: 'שגיאה בנתוני הבקשה',
-            details: error.details.map(err => err.message)
-        });
+        throw new AppError(
+            'שגיאה בנתוני הבקשה',
+            400,
+            'Validation Error',
+            error.details.map(err => err.message)
+        );
     }
 
-        req.body = value;
+    req.body = value;
     next();
 };
 
@@ -34,7 +38,25 @@ export const validateBody = (schema) => (req, res, next) => {
 //טיפול בשגיאות :
 // היחיד שמקבל 4 פרמטרים לטיפול בשגיאות
 export const errorHandler = (err, req, res, next) => {
-    //err:{Msg,statuse,type}
-    const {Msg="",statuse=500,type="Server Error"}=err;
-    return res.status(statuse).json({ error:{message: Msg , type } });
-}
+    const status = err.status ?? err.statusCode
+        ?? (err.code === 11000 ? 409 : ['ValidationError', 'CastError'].includes(err.name) ? 400 : 500);
+    const message = err instanceof AppError || status < 500
+        ? err.message
+        : 'Internal Server Error';
+    const response = {
+        error: {
+            message,
+            type: err.type ?? (status < 500 ? 'Request Error' : 'Server Error'),
+        },
+    };
+
+    if (err.details) {
+        response.error.details = err.details;
+    }
+
+    return res.status(status).json(response);
+};
+
+export const pathNotFound = (req, res, next) => {
+    throw new AppError(`${req.url} ${req.method} is not found`, 404, 'Page Not Found');
+};

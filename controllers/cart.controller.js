@@ -1,14 +1,16 @@
 import Cart from '../models/Cart.js';
+import { AppError } from '../utils/appErrors.js';
 
 export const getCart = async (req, res) => {
   try {
     const cart = await Cart.findOne({ user: req.params.userId }).populate('items.product');
     if (!cart) {
-      return res.status(404).json({ message: 'עגלה לא נמצאה' });
+      throw new AppError('עגלה לא נמצאה', 404, 'Not Found');
     }
     res.status(200).json(cart);
   } catch (error) {
-    res.status(500).json({ message: 'שגיאה בשליפת העגלה', error: error.message });
+    if (error instanceof AppError) throw error;
+    throw new AppError('שגיאה בשליפת העגלה', 500);
   }
 };
 
@@ -29,7 +31,7 @@ export const addToCart = async (req, res) => {
     const updatedCart = await cart.populate('items.product');
     res.status(200).json(updatedCart);
   } catch (error) {
-    res.status(500).json({ message: 'שגיאה בעדכון העגלה', error: error.message });
+    throw new AppError('שגיאה בעדכון העגלה', 500);
   }
 };
 
@@ -38,13 +40,14 @@ export const removeFromCart = async (req, res) => {
     const { userId, productId } = req.body;
     const cart = await Cart.findOne({ user: userId });
     if (!cart) {
-      return res.status(404).json({ message: 'עגלה לא נמצאה' });
+      throw new AppError('עגלה לא נמצאה', 404, 'Not Found');
     }
     cart.items = cart.items.filter(item => item.product.toString() !== productId);
     await cart.save();
     const updatedCart = await cart.populate('items.product');
     res.status(200).json(updatedCart);
   } catch (error) {
-    res.status(500).json({ message: 'שגיאה בהסרת מוצר', error: error.message });
+    if (error instanceof AppError) throw error;
+    throw new AppError('שגיאה בהסרת מוצר', 500);
   }
 };

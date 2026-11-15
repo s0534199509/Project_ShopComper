@@ -1,5 +1,5 @@
 import express from 'express';
-import { addToCartSchema, removeFromCartSchema } from '../validations/Cart.valisation.js';
+import { addToCartSchema, removeFromCartSchema } from '../validations/cart.validation.js';
 import { validateBody } from '../middlewares/custom.middleware.js';
 import { 
   getCart, 
