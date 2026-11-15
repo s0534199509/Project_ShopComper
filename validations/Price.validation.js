@@ -19,7 +19,7 @@ export const pricePostSchema = Joi.object({
     'any.required': 'מחיר הוא שדה חובה'
   }),
   productId: mongoIdSchema.required().messages({
-    'any.required': 'נא לספק מזהה מוצר'
+    'any.required': 'נא לספק מזהה מוצר'   
   }),
   chain: mongoIdSchema.required().messages({
     'any.required': 'נא לספק מזהה רשת'
