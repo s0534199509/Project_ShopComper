@@ -4,7 +4,7 @@ import { connectDB } from './config/db.js';
 import productRouter from './routes/product.router.js';
 import chainRouter from './routes/chain.router.js';
 import priceRouter from './routes/price.router.js';
-import cartRouter from './routes/cart.router.js';
+import cartRouter from './routes  /cart.router.js';
 import userRouter from './routes/user.router.js';
 import { printMsg,errorHandler,pathNotFound } from './middlewares/custom.middleware.js';
 

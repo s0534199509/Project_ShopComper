@@ -1,7 +1,7 @@
 import Cart from '../models/Cart.js';
 import { AppError } from '../utils/appErrors.js';
 
-export const getCart = async (req, res) => {
+export const getCart = async (req, res, next) => {
   try {
     const cart = await Cart.findOne({ user: req.params.userId }).populate('items.product');
     if (!cart) {
@@ -9,12 +9,11 @@ export const getCart = async (req, res) => {
     }
     res.status(200).json(cart);
   } catch (error) {
-    if (error instanceof AppError) throw error;
-    throw new AppError('שגיאה בשליפת העגלה', 500);
+    next(error); // מעביר את השגיאה ל-errorHandler המרכזי
   }
 };
 
-export const addToCart = async (req, res) => {
+export const addToCart = async (req, res, next) => {
   try {
     const { userId, productId, quantity = 1 } = req.body;
     let cart = await Cart.findOne({ user: userId });
@@ -31,11 +30,11 @@ export const addToCart = async (req, res) => {
     const updatedCart = await cart.populate('items.product');
     res.status(200).json(updatedCart);
   } catch (error) {
-    throw new AppError('שגיאה בעדכון העגלה', 500);
+    next(new AppError('שגיאה בעדכון העגלה', 500));
   }
 };
 
-export const removeFromCart = async (req, res) => {
+export const removeFromCart = async (req, res, next) => {
   try {
     const { userId, productId } = req.body;
     const cart = await Cart.findOne({ user: userId });
@@ -47,7 +46,6 @@ export const removeFromCart = async (req, res) => {
     const updatedCart = await cart.populate('items.product');
     res.status(200).json(updatedCart);
   } catch (error) {
-    if (error instanceof AppError) throw error;
-    throw new AppError('שגיאה בהסרת מוצר', 500);
+    next(error); // מעביר את השגיאה ל-errorHandler המרכזי
   }
 };
