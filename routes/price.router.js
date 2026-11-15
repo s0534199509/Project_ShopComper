@@ -8,7 +8,7 @@ import {
   deletePrice,
 } from '../controllers/price.controller.js';
 import { validateBody } from '../middlewares/custom.middleware.js';
-import { pricePostSchema, pricePatchSchema } from '../validations/Price.validation.js' ;
+import { pricePostSchema, pricePatchSchema } from '../validations/price.validation.js' ;
 
 const router = Router();
 

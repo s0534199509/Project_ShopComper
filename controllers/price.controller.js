@@ -1,4 +1,5 @@
 import Price from '../models/Price.js';
+import { AppError } from '../utils/appErrors.js';
 
 // שליפת כל המחירונים כולל פרטי המוצר והרשת
 export const getAllPrices = async (req, res) => {
@@ -8,7 +9,7 @@ export const getAllPrices = async (req, res) => {
       .populate('chain');   // מאכלס את פרטי הרשת
     res.status(200).json(prices);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    throw error;
   }
 };
 
@@ -20,11 +21,11 @@ export const getPriceById = async (req, res) => {
       .populate('chain');
       
     if (!price) {
-      return res.status(404).json({ message: 'מחירון לא נמצא' });
+      throw new AppError('מחירון לא נמצא', 404, 'Not Found');
     }
     res.status(200).json(price);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    throw error;
   }
 };
 
@@ -35,7 +36,7 @@ export const createPrice = async (req, res) => {
     const populatedPrice = await newPrice.populate(['product', 'chain']);
     res.status(201).json(populatedPrice);
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    throw error;
   }
 };
 
@@ -49,11 +50,11 @@ export const updatePrice = async (req, res) => {
     ).populate(['product', 'chain']);
 
     if (!updatedPrice) {
-      return res.status(404).json({ message: 'מחירון לא נמצא' });
+      throw new AppError('מחירון לא נמצא', 404, 'Not Found');
     }
     res.status(200).json(updatedPrice);
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    throw error;
   }
 };
 
@@ -67,11 +68,11 @@ export const patchPrice = async (req, res) => {
     ).populate(['product', 'chain']);
 
     if (!updatedPrice) {
-      return res.status(404).json({ message: 'מחירון לא נמצא' });
+      throw new AppError('מחירון לא נמצא', 404, 'Not Found');
     }
     res.status(200).json(updatedPrice);
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    throw error;
   }
 };
 
@@ -80,10 +81,10 @@ export const deletePrice = async (req, res) => {
   try {
     const deletedPrice = await Price.findByIdAndDelete(req.params.id);
     if (!deletedPrice) {
-      return res.status(404).json({ message: 'מחירון לא נמצא' });
+      throw new AppError('מחירון לא נמצא', 404, 'Not Found');
     }
     res.status(200).json({ message: 'המחירון נמחק בהצלחה' });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    throw error;
   }
 };
