@@ -30,4 +30,4 @@ export const chainPatchSchema = Joi.object({
   isActive: Joi.boolean().messages({
     'boolean.base': 'שדה פעילות חייב להיות מסוג בוליאני'
   })
-});
+}
