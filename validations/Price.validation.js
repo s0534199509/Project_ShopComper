@@ -9,7 +9,11 @@ const mongoIdSchema = Joi.string().hex().length(24).messages({
 
 // סכמה לבדיקת תקינות ביצירת מחירון חדש (POST) או עדכון מלא (PUT)
 export const pricePostSchema = Joi.object({
+<<<<<<< HEAD
   product: Joi.number().min(0).required().messages({
+=======
+  price: Joi.number().min(0).required().messages({
+>>>>>>> 6bb19d6fd41b333eef23e1d17406757c32bcb1e5
     'number.base': 'מחיר חייב להיות מספר',
     'number.min': 'מחיר חייב להיות מספר חיובי',
     'any.required': 'מחיר הוא שדה חובה'

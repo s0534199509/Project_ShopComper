@@ -6,6 +6,10 @@ const mongoIdSchema = Joi.string().hex().length(24).messages({
   'string.length': 'מזהה חייב להיות באורך 24 תווים',
   'string.base': 'מזהה חייב להיות מחרוזת'
 });
+<<<<<<< HEAD
+=======
+
+>>>>>>> 6bb19d6fd41b333eef23e1d17406757c32bcb1e5
 // 1. סכמה להוספת מוצר לעגלה (POST /cart)
 // תואמת בדיוק למה שהקונטרולר מצפה לקבל ב-req.body
 export const addToCartSchema = Joi.object({
