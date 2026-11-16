@@ -8,6 +8,6 @@ export const connectDB = async () => {
     console.log('MongoDB connected successfully');
   }  catch (error) {
     console.error('Error connecting to MongoDB:', error.message);
-    process.exit(1); // עוצר את השרת כדי שלא ירוץ באוויר ללא מסד נתונים
+    process.exit(1);
   }
 };

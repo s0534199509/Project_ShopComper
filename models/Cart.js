@@ -1,31 +1,44 @@
-import { Schema, model } from 'mongoose';
+import { model, Schema, SchemaTypes } from "mongoose";
 
-// סכמה פנימית לפריט בודד בתוך העגלה
 const cartItemSchema = new Schema(
   {
     product: {
-      type: Schema.Types.ObjectId,
+      type: SchemaTypes.ObjectId,
       ref: 'Product',
-      required: [true, 'נא לקשר מוצר'],
+      required: [true, 'Please link a product'],
+    },
+    name: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    price: {
+      type: Number,
+      required: true,
+      min: 0,
     },
     quantity: {
       type: Number,
       required: true,
-      min: [1, 'כמות חייבת להיות לפחות 1'],
+      min: [1, 'Quantity must be at least 1'],
       default: 1,
     },
   },
   { _id: false }
 );
 
-// סכמת העגלה הראשית המקושרת למשתמש
 const cartSchema = new Schema(
   {
     user: {
-      type: Schema.Types.ObjectId,
+      type: SchemaTypes.ObjectId,
       ref: 'User',
-      required: [true, 'נא לקשר משתמש'],
-      unique: true, // מבטיח עגלה פעילה אחת בלבד לכל משתמש
+      required: [true, 'Please link a user'],
+      unique: true,
+    },
+    chain: {
+      type: SchemaTypes.ObjectId,
+      ref: 'Chain',
+      required: [true, 'Please link a retail chain to the cart'],
     },
     items: [cartItemSchema],
   },
@@ -34,5 +47,5 @@ const cartSchema = new Schema(
   }
 );
 
-const Cart = model('Cart', cartSchema);
+const Cart = model('carts', cartSchema);
 export default Cart;

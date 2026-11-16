@@ -9,14 +9,14 @@ const userSchema = new Schema(
   {
     name: {
       type: String,
-      required: [true, 'נא להזין שם משתמש'],
+      required: [true, 'Please enter a user name'],
       trim: true,
       minlength: 2,
       maxlength: 50,
     },
     email: {
       type: String,
-      required: [true, 'נא להזין כתובת אימייל'],
+      required: [true, 'Please enter an email address'],
       unique: true,
       lowercase: true,
       trim: true,

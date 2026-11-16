@@ -1,33 +1,31 @@
 import Joi from 'joi';
 
-// סכמה לבדיקת תקינות ביצירת רשת שיווק חדשה (POST) או עדכון מלא (PUT)
 export const chainPostSchema = Joi.object({
   name: Joi.string().trim().min(2).max(50).required().messages({
-    'string.base': 'שם הרשת חייב להיות מחרוזת',
-    'string.empty': 'נא להזין שם רשת',
-    'string.min': 'שם הרשת חייב להכיל לפחות 2 תווים',
-    'string.max': 'שם הרשת יכול להכיל עד 50 תווים',
-    'any.required': 'נא להזין שם רשת'
+    'string.base': 'Chain name must be a string',
+    'string.empty': 'Please enter a chain name',
+    'string.min': 'Chain name must be at least 2 characters long',
+    'string.max': 'Chain name cannot exceed 50 characters',
+    'any.required': 'Please enter a chain name'
   }),
   logoUrl: Joi.string().uri().allow('').messages({
-    'string.uri': 'כתובת הלוגו חייבת להיות כתובת אינטרנט תקנית (URL)'
+    'string.uri': 'Logo URL must be a valid URL'
   }),
   isActive: Joi.boolean().messages({
-    'boolean.base': 'שדה פעילות חייב להיות מסוג בוליאני'
+    'boolean.base': 'Activity status must be a boolean'
   })
 });
 
-// סכמה לבדיקת תקינות בעדכון חלקי של רשת שיווק (PATCH)
 export const chainPatchSchema = Joi.object({
   name: Joi.string().trim().min(2).max(50).messages({
-    'string.base': 'שם הרשת חייב להיות מחרוזת',
-    'string.min': 'שם הרשת חייב להכיל לפחות 2 תווים',
-    'string.max': 'שם הרשת יכול להכיל עד 50 תווים'
+    'string.base': 'Chain name must be a string',
+    'string.min': 'Chain name must be at least 2 characters long',
+    'string.max': 'Chain name cannot exceed 50 characters'
   }),
   logoUrl: Joi.string().uri().allow('').messages({
-    'string.uri': 'כתובת הלוגו חייבת להיות כתובת אינטרנט תקנית (URL)'
+    'string.uri': 'Logo URL must be a valid URL'
   }),
   isActive: Joi.boolean().messages({
-    'boolean.base': 'שדה פעילות חייב להיות מסוג בוליאני'
+    'boolean.base': 'Activity status must be a boolean'
   })
 });

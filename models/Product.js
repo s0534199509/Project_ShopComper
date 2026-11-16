@@ -4,13 +4,13 @@ const productSchema = new Schema(
   {
     barcode: {
       type: String,
-      required: [true, 'נא להזין ברקוד'],
-      unique: true, // מבטיח שלא נכניס בטעות פעמיים את אותו מוצר
+      required: [true, 'Please enter a barcode'],
+      unique: true,
       trim: true,
     },
     name: {
       type: String,
-      required: [true, 'נא להזין שם מוצר'],
+      required: [true, 'Please enter a product name'],
       trim: true,
     },
     description: {
@@ -27,7 +27,7 @@ const productSchema = new Schema(
     },
   },
   {
-    timestamps: true, // מוסיף אוטומטית שדות createdAt ו-updatedAt
+    timestamps: true,
   }
 );
 
