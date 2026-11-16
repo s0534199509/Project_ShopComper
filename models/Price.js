@@ -3,22 +3,22 @@ import { Schema, model } from 'mongoose';
 const priceSchema = new Schema({
   product: {
     type: Schema.Types.ObjectId,
-    ref: 'Product', // מקשר ל-Product.js
-    required: true
+    ref: 'Product',
+    required: true,
   },
   chain: {
     type: Schema.Types.ObjectId,
-    ref: 'Chain',   // מקשר ל-Chain.js
-    required: true
+    ref: 'Chain',
+    required: true,
   },
   price: {
     type: Number,
     required: true,
-    min: 0
+    min: 0,
   },
   inStock: {
     type: Boolean,
-    default: true
+    default: true,
   }
 }, { timestamps: true });
 

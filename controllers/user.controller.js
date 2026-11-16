@@ -1,55 +1,55 @@
 import User from '../models/User.js';
 import Cart from '../models/Cart.js';
+import { AppError } from '../utils/appErrors.js';
 
-// הרשמת משתמש חדש ויצירת עגלה ראשונית
-export const registerUser = async (req, res) => {
+export const registerUser = async (req, res, next) => {
   try {
     const { name, email, password } = req.body;
 
-    // בדיקה אם המשתמש כבר קיים
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(409).json({ message: 'משתמש עם אימייל זה כבר קיים במערכת' });
+      throw new AppError('A user with this email already exists', 409, 'Conflict');
     }
 
-    // יצירת המשתמש
     const user = new User({ name, email });
     await user.setPassword(password);
     await user.save();
 
-    // יצירת עגלה ריקה המשויכת למשתמש החדש
     await Cart.create({ user: user._id, items: [] });
 
     res.status(201).json({
-      message: 'ההרשמה בוצעה בהצלחה',
+      message: 'Registration successful',
       user: { id: user._id, name: user.name, email: user.email },
     });
   } catch (error) {
     if (error.code === 11000 && error.keyPattern?.email) {
-      return res.status(409).json({ message: 'משתמש עם אימייל זה כבר קיים במערכת' });
+      error = new AppError('A user with this email already exists', 409, 'Conflict');
+    } else if (!(error instanceof AppError)) {
+      console.error('Error registering user:', error);
+      error = new AppError('An error occurred while registering the user', 500);
     }
-
-    console.error('Error registering user:', error);
-    res.status(500).json({ message: 'שגיאה בהרשמת המשתמש' });
+    next(error);
   }
 };
 
-// התחברות משתמש קיים
-export const loginUser = async (req, res) => {
+export const loginUser = async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
     const user = await User.findOne({ email }).select('+passwordHash');
     if (!user || !(await user.verifyPassword(password))) {
-      return res.status(401).json({ message: 'אימייל או סיסמה שגויים' });
+      throw new AppError('Invalid email or password', 401, 'Unauthorized');
     }
 
     res.status(200).json({
-      message: 'התחברות בוצעה בהצלחה',
+      message: 'Login successful',
       user: { id: user._id, name: user.name, email: user.email },
     });
   } catch (error) {
-    console.error('Error logging in user:', error);
-    res.status(500).json({ message: 'שגיאה בהתחברות' });
+    if (!(error instanceof AppError)) {
+      console.error('Error logging in user:', error);
+      error = new AppError('An error occurred while logging in the user', 500);
+    }
+    next(error);
   }
 };

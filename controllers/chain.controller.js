@@ -1,68 +1,69 @@
 import chain from '../models/Chain.js';
+import { AppError } from '../utils/appErrors.js';
 
 // GET all chains
-export const getAllChains = async (req, res) => {
+export const getAllChains = async (req, res, next) => {
     try {
         const chains = await chain.find({});
         res.status(200).json(chains);
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        next(error);
     }  
 };
 
-export const getChainById = async (req, res) => {
+export const getChainById = async (req, res, next) => {
     try {
         const foundChain = await chain.findById(req.params.id);
         if (!foundChain) {
-            return res.status(404).json({ message: 'Chain not found' });
+            throw new AppError('Chain not found', 404, 'Not Found');
         }
         res.status(200).json(foundChain);
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        next(error);
     }
 };
 
-export const createChain = async (req, res) => {
+export const createChain = async (req, res, next) => {
     try {
         const newChain = await chain.create(req.body);
         res.status(201).json(newChain);
     } catch (error) {
-        res.status(400).json({ message: error.message });
+        next(error);
     }
 };
 
-export const updateChain = async (req, res) => {
+export const updateChain = async (req, res, next) => {
     try {
         const updatedChain = await chain.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
         if (!updatedChain) {
-            return res.status(404).json({ message: 'Chain not found' });
+            throw new AppError('Chain not found', 404, 'Not Found');
         }
         res.status(200).json(updatedChain);
     } catch (error) {
-        res.status(400).json({ message: error.message });
+        next(error);
     }  
 };
 
-export const patchChain = async (req, res) => {
+export const patchChain = async (req, res, next) => {
     try {
         const updatedChain = await chain.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
         if (!updatedChain) {
-            return res.status(404).json({ message: 'Chain not found' });
+            throw new AppError('Chain not found', 404, 'Not Found');
         }
         res.status(200).json(updatedChain);
     } catch (error) {
-        res.status(400).json({ message: error.message });
+        next(error);
     }
 };  
 
-export const deleteChain = async (req, res) => {
+export const deleteChain = async (req, res, next) => {
     try {
         const deletedChain = await chain.findByIdAndDelete(req.params.id);
         if (!deletedChain) {
-            return res.status(404).json({ message: 'Chain not found' });
+            throw new AppError('Chain not found', 404, 'Not Found');
         }
         res.status(200).json({ message: 'Chain deleted successfully' });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        next(error);
     }  
 };

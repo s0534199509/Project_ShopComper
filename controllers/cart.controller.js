@@ -1,50 +1,91 @@
 import Cart from '../models/Cart.js';
+import Price from '../models/Price.js';
+import { AppError } from '../utils/appErrors.js';
 
-export const getCart = async (req, res) => {
+export const getCart = async (req, res, next) => {
   try {
-    const cart = await Cart.findOne({ user: req.params.userId }).populate('items.product');
+    const cart = await Cart.findOne({ user: req.params.userId })
+      .populate('chain')
+      .populate('items.product');
+
     if (!cart) {
-      return res.status(404).json({ message: 'עגלה לא נמצאה' });
+      throw new AppError('Cart not found', 404, 'Not Found');
     }
-    res.status(200).json(cart);
+
+    const itemsWithPrices = await Promise.all(
+      cart.items.map(async (item) => {
+        const priceDoc = await Price.findOne({
+          product: item.product._id,
+          chain: cart.chain._id,
+        });
+
+        return {
+          product: item.product,
+          quantity: item.quantity,
+          price: priceDoc ? priceDoc.price : 0,
+          inStock: priceDoc ? priceDoc.inStock : false,
+        };
+      })
+    );
+
+    const totalPrice = itemsWithPrices.reduce(
+      (sum, item) => sum + item.price * item.quantity,
+      0
+    );
+
+    res.status(200).json({
+      user: cart.user,
+      chain: cart.chain,
+      items: itemsWithPrices,
+      totalPrice,
+    });
   } catch (error) {
-    res.status(500).json({ message: 'שגיאה בשליפת העגלה', error: error.message });
+    next(error);
   }
 };
 
-export const addToCart = async (req, res) => {
+export const addToCart = async (req, res, next) => {
   try {
-    const { userId, productId, quantity = 1 } = req.body;
+    const { userId, productId, chainId, quantity = 1 } = req.body;
+    
     let cart = await Cart.findOne({ user: userId });
     if (!cart) {
-      cart = new Cart({ user: userId, items: [] });
+      cart = new Cart({ user: userId, chain: chainId, items: [] });
     }
-    const itemIndex = cart.items.findIndex(item => item.product.toString() === productId);
+
+    const itemIndex = cart.items.findIndex(
+      (item) => item.product.toString() === productId
+    );
+
     if (itemIndex > -1) {
       cart.items[itemIndex].quantity += quantity;
     } else {
       cart.items.push({ product: productId, quantity });
     }
+
     await cart.save();
-    const updatedCart = await cart.populate('items.product');
-    res.status(200).json(updatedCart);
+    res.status(200).json(cart);
   } catch (error) {
-    res.status(500).json({ message: 'שגיאה בעדכון העגלה', error: error.message });
+    next(error);
   }
 };
 
-export const removeFromCart = async (req, res) => {
+export const removeFromCart = async (req, res, next) => {
   try {
     const { userId, productId } = req.body;
     const cart = await Cart.findOne({ user: userId });
+    
     if (!cart) {
-      return res.status(404).json({ message: 'עגלה לא נמצאה' });
+      throw new AppError('Cart not found', 404, 'Not Found');
     }
-    cart.items = cart.items.filter(item => item.product.toString() !== productId);
+    
+    cart.items = cart.items.filter(
+      (item) => item.product.toString() !== productId
+    );
+    
     await cart.save();
-    const updatedCart = await cart.populate('items.product');
-    res.status(200).json(updatedCart);
+    res.status(200).json(cart);
   } catch (error) {
-    res.status(500).json({ message: 'שגיאה בהסרת מוצר', error: error.message });
+    next(error);
   }
 };
