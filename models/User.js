@@ -1,9 +1,5 @@
 import { Schema, model } from 'mongoose';
-import { randomBytes, scrypt as scryptCallback, timingSafeEqual } from 'node:crypto';
-import { promisify } from 'node:util';
-
-const scrypt = promisify(scryptCallback);
-const PASSWORD_HASH_LENGTH = 64;
+import bcrypt from 'bcryptjs';
 
 const userSchema = new Schema(
   {
@@ -14,6 +10,11 @@ const userSchema = new Schema(
       minlength: 2,
       maxlength: 50,
     },
+    role: {
+      type: String,
+      enum: ['user', 'admin'],
+      default: 'user',
+    },
     email: {
       type: String,
       required: [true, 'Please enter an email address'],
@@ -22,9 +23,10 @@ const userSchema = new Schema(
       trim: true,
       maxlength: 254,
     },
-    passwordHash: {
+    password: {
       type: String,
-      required: true,
+      required: [true, 'Please enter a password'],
+      minlength: 6,
       select: false,
     },
   },
@@ -32,34 +34,27 @@ const userSchema = new Schema(
     timestamps: true,
     toJSON: {
       transform(_document, returnedObject) {
-        delete returnedObject.passwordHash;
+        delete returnedObject.password;
         return returnedObject;
       },
     },
     toObject: {
       transform(_document, returnedObject) {
-        delete returnedObject.passwordHash;
+        delete returnedObject.password;
         return returnedObject;
       },
     },
   }
 );
 
-userSchema.methods.setPassword = async function (password) {
-  const salt = randomBytes(16).toString('hex');
-  const hash = await scrypt(password, salt, PASSWORD_HASH_LENGTH);
-  this.passwordHash = `${salt}:${hash.toString('hex')}`;
-};
+userSchema.pre('save', async function () {
+  if (!this.isModified('password')) return;
+  const salt = await bcrypt.genSalt(10);
+  this.password = await bcrypt.hash(this.password, salt);
+});
 
-userSchema.methods.verifyPassword = async function (password) {
-  const [salt, storedHash] = this.passwordHash?.split(':') ?? [];
-  if (!salt || !storedHash || !/^[a-f\d]{32}$/i.test(salt) || !/^[a-f\d]{128}$/i.test(storedHash)) {
-    return false;
-  }
-
-  const expectedHash = Buffer.from(storedHash, 'hex');
-  const actualHash = await scrypt(password, salt, PASSWORD_HASH_LENGTH);
-  return timingSafeEqual(expectedHash, actualHash);
+userSchema.methods.comparePassword = async function (candidatePassword) {
+  return bcrypt.compare(candidatePassword, this.password);
 };
 
 const User = model('User', userSchema);
