@@ -1,55 +1,67 @@
 import User from '../models/User.js';
-import Cart from '../models/Cart.js';
 import { AppError } from '../utils/appErrors.js';
+import { createToken } from '../utils/token.js';
 
-export const registerUser = async (req, res, next) => {
+export const register = async (req, res, next) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, role } = req.body;
 
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      throw new AppError('A user with this email already exists', 409, 'Conflict');
+    if (!name || !email || !password) {
+      throw new AppError('Name, email and password are required', 400, 'Bad Request');
     }
 
-    const user = new User({ name, email });
-    await user.setPassword(password);
-    await user.save();
+    const existingUser = await User.findOne({ email: email.toLowerCase() });
+    if (existingUser) {
+      throw new AppError('Email is already registered', 409, 'Conflict');
+    }
 
-    await Cart.create({ user: user._id, items: [] });
+    const user = await User.create({ name, email, password, role });
+    const token = createToken({ _id: user._id, role: user.role });
 
     res.status(201).json({
-      message: 'Registration successful',
-      user: { id: user._id, name: user.name, email: user.email },
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
     });
   } catch (error) {
-    if (error.code === 11000 && error.keyPattern?.email) {
-      error = new AppError('A user with this email already exists', 409, 'Conflict');
-    } else if (!(error instanceof AppError)) {
-      console.error('Error registering user:', error);
-      error = new AppError('An error occurred while registering the user', 500);
-    }
     next(error);
   }
 };
 
-export const loginUser = async (req, res, next) => {
+export const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
-    const user = await User.findOne({ email }).select('+passwordHash');
-    if (!user || !(await user.verifyPassword(password))) {
+    if (!email || !password) {
+      throw new AppError('Email and password are required', 400, 'Bad Request');
+    }
+
+    const user = await User.findOne({ email: email.toLowerCase() }).select('+password');
+    if (!user) {
       throw new AppError('Invalid email or password', 401, 'Unauthorized');
     }
 
+    const isPasswordValid = await user.comparePassword(password);
+    if (!isPasswordValid) {
+      throw new AppError('Invalid email or password', 401, 'Unauthorized');
+    }
+
+    const token = createToken({ _id: user._id, role: user.role });
+
     res.status(200).json({
-      message: 'Login successful',
-      user: { id: user._id, name: user.name, email: user.email },
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
     });
   } catch (error) {
-    if (!(error instanceof AppError)) {
-      console.error('Error logging in user:', error);
-      error = new AppError('An error occurred while logging in the user', 500);
-    }
     next(error);
   }
 };
